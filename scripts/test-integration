@@ -12,5 +12,5 @@ bash -x ./scripts/package
 
 echo Running regression tests
 set -x
-ID=$(docker run --net=host --privileged --rm -itd $REPO/k3os-qemu:$TAG run-kvm-test.sh)
+ID=$(docker run --net=host --privileged --rm -itd -w /go/src/github.com/$REPO/k3os $REPO/k3os-qemu:$TAG go test -v ./pkg/test/... -integration)
 docker attach $ID || docker kill $ID

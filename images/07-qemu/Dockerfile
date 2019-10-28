@@ -5,8 +5,16 @@ FROM ${REPO}/k3os-kernel:${TAG} as kernel
 ARG REPO
 ARG TAG
 FROM ${REPO}/k3os-iso:${TAG} as iso
+
+ARG REPO
+ARG TAG
+FROM ${REPO}/k3os-gobuild:${TAG} as gobuild
 ARG VERSION
 ARG ARCH
+
+ENV GOPATH /go
+ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
+RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
 RUN set -x \
  && apk add \
@@ -26,9 +34,9 @@ RUN [ "$ARCH" == "arm64" ] \
  || true
 RUN ln -s /usr/bin/qemu-system-* /usr/bin/qemu-system
 
-COPY --from=kernel /output/vmlinuz /output/
-COPY --from=kernel /output/initrd /output/
-COPY --from=kernel /output/kernel.squashfs /output/
-COPY *.sh /usr/local/bin/
-
+COPY /pkg/ $GOPATH/src/github.com/rancher/k3os/pkg/
+COPY /vendor/ $GOPATH/src/github.com/rancher/k3os/vendor/
+COPY --from=kernel /output/ /output/
+COPY --from=iso /output/ /output/
+COPY images/07-qemu/*.sh /usr/local/bin/
 WORKDIR /output

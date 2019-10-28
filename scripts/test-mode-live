@@ -1,0 +1,27 @@
+#!/bin/bash
+. $(dirname $0)/version
+: ${DISTDIR:=$(realpath --relative-to=. $(dirname $0)/../dist)}
+: ${BUILDDIR:=$(realpath --relative-to=. $(dirname $0)/../build)}
+: ${STATEDIR:=${BUILDDIR}/test/mode-live/k3os-$TAG}
+
+set -e
+
+if [ ! -e $STATEDIR/disk.img ]; then
+    mkdir -p $STATEDIR
+    qemu-img create -f qcow2 $STATEDIR/disk.img 8g
+fi
+
+time ${QEMU_SYSTEM:=qemu-system-$(uname -m)} \
+    -smp 1 \
+    -m 2048 \
+    -nographic \
+    -display none \
+    -serial mon:stdio \
+    -machine accel=kvm:hvf:tcg \
+    -rtc base=utc,clock=rt \
+    -kernel ${DISTDIR}/artifacts/k3os-vmlinuz-${ARCH} \
+    -initrd ${DISTDIR}/artifacts/k3os-initrd-${ARCH} \
+    -drive if=ide,media=cdrom,index=0,file=${DISTDIR}/artifacts/k3os-${ARCH}.iso \
+    -drive if=virtio,media=disk,file=$STATEDIR/disk.img \
+    -append "loglevel=5 panic=-1 console=ttyS0 k3os.net.noping k3os.mode=live k3os.debug run_cmd=\"sh -c 'sleep 5; echo; echo POWEROFF IN 5 ...; sleep 5; poweroff' &\""  \
+    -no-reboot
