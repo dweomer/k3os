@@ -1,0 +1,1 @@
+alias k3os-system='kubectl -n k3os-system'

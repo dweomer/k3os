@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/ghodss/yaml"
+	"github.com/rancher/k3os/pkg/system"
 	"github.com/rancher/mapper"
 	"github.com/rancher/mapper/convert"
 	merge2 "github.com/rancher/mapper/convert/merge"
@@ -16,7 +17,7 @@ import (
 )
 
 const (
-	SystemConfig = "/k3os/system/config.yaml"
+	SystemConfig = system.RootDir + "/config.yaml"
 	LocalConfig  = "/var/lib/rancher/k3os/config.yaml"
 	localConfigs = "/var/lib/rancher/k3os/config.d"
 )

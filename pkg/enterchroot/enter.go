@@ -27,11 +27,11 @@ var (
 	DebugCmdline = ""
 )
 
-func init() {
-	reexec.Register("enter-root", enter)
-}
+// func init() {
+// 	reexec.Register("enter-root", Enter)
+// }
 
-func enter() {
+func Enter() {
 	if os.Getenv("ENTER_DEBUG") == "true" {
 		logrus.SetLevel(logrus.DebugLevel)
 	}

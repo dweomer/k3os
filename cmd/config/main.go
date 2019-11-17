@@ -30,9 +30,9 @@ func main() {
 	}
 }
 
-func run(_ *cli.Context) error {
+func run(c *cli.Context) error {
 	if os.Getuid() != 0 {
-		return fmt.Errorf("must run %s as root", os.Args[0])
+		return fmt.Errorf("must be run as root")
 	}
 	if debug {
 		logrus.SetLevel(logrus.DebugLevel)
