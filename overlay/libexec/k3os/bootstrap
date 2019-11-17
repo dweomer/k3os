@@ -41,7 +41,7 @@ ccapply_initrd()
         return 0
     fi
 
-    ccapply --initrd
+    $K3OS_SYSTEM/k3os/current/k3os ccapply --initrd
 }
 
 setup_etc
