@@ -37,7 +37,7 @@ Events:  <none>
 ## The Resource Controller
 Controlling this resource is a DaemonSet running on every `k3os` node in the cluster. It watches for changes on `UpdateChannel.Spec.Version` and if a node's installed version differs the controller will attempt to take up one of the `UpdateChannel.Status.Updating` slots (max of `UpdateChannel.Spec.Concurrency`) and when successful will schedule a batch `Job` that invokes `k3os ops upgrade`. The controller will watch for this job to finish, when it does it will free up the `UpdateChannel.Status.Updating` slot and schedule a reboot, via goroutine, on a delay of 5 seconds.
 
-Additionally, the controller will notice when `UpdateChannel.Spec.Version` is `latest` (or empty) and attempt to poll for the latest release. As there is only one `UpdateChannel.Status.Polling` slot, only one node will poll at a time and if there are any polling nodes updates will not be triggered.
+Additionally, the controller will notice when `UpdateChannel.Spec.Version` is `latest` (or empty) and attempt to poll for the latest release. As there is only one `UpdateChannel.Status.Polling` slot, only one node will poll at a time and if there are any polling nodes upgrades will not be triggered.
 
 # WARNING, PREVIEW, EXPECT TO RE-IMAGE NODES
 ## This preview should be considered early alpha quality at best.
