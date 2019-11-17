@@ -1,6 +1,7 @@
 # Introducing the k3OS Operator
 # :construction: Work-In-Progress :construction:
-
+[![asciicast](https://asciinema.org/a/281809.svg)](https://asciinema.org/a/281809)
+# :construction: Work-In-Progress :construction:
 Initially focused with providing a kubernetes-native upgrade experience, this change-set enhances the k3os multi-call binary to provide:
 - `k3os ops agent` custom resource and node controller
 - `k3os ops upgrade` perform rootfs and kernel upgrades
