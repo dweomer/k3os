@@ -1,4 +1,7 @@
 # Introducing the k3OS Operator
+
+See https://github.com/rancher/k3os/labels/area%2Fupgrade
+
 # :construction: Work-In-Progress :construction:
 [![asciicast](https://asciinema.org/a/281809.svg)](https://asciinema.org/a/281809)
 # :construction: Work-In-Progress :construction:
