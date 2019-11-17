@@ -111,8 +111,8 @@ spec:
               add: ["CAP_SYS_BOOT"]
           command: ["k3os", "ops", "agent", "--namespace", "k3os-system"]
           env:
-            # - name: K3OS_DEBUG
-            #   value: 'true'
+            - name: K3OS_DEBUG
+              value: 'true'
             - name: K3OS_NODE_NAME
               valueFrom:
                 fieldRef:
