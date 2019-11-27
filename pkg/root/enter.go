@@ -1,4 +1,4 @@
-package enterchroot
+package root
 
 import (
 	"fmt"
@@ -23,60 +23,22 @@ const (
 )
 
 var (
-	symlinks     = []string{"lib", "bin", "sbin"}
-	DebugCmdline = ""
+	symlinks = []string{"lib", "bin", "sbin"}
 )
 
-func init() {
-	reexec.Register("enter-root", enter)
-}
-
-func enter() {
-	if os.Getenv("ENTER_DEBUG") == "true" {
-		logrus.SetLevel(logrus.DebugLevel)
-	}
-
-	logrus.Debug("Running bootstrap")
-	err := run(os.Getenv("ENTER_DATA"))
-	if err != nil {
+// Enter the k3OS root
+func Enter() {
+	logrus.Debug("Entering root")
+	if err := enter(os.Getenv("ENTER_DATA")); err != nil {
 		logrus.Fatal(err)
+
 	}
 }
 
-func isDebug() bool {
-	if os.Getenv("ENTER_DEBUG") == "true" {
-		return true
-	}
-
-	if DebugCmdline == "" {
-		return false
-	}
-
-	bytes, err := ioutil.ReadFile("/proc/cmdline")
-	if err != nil {
-		// ignore error
-		return false
-	}
-	for _, word := range strings.Fields(string(bytes)) {
-		if word == DebugCmdline {
-			return true
-		}
-	}
-
-	return false
-}
-
+// Mount the k3OS root
 func Mount(dataDir string, args []string, stdout, stderr io.Writer) error {
 	if err := ensureloop(); err != nil {
 		return err
-	}
-
-	if isDebug() {
-		logrus.SetLevel(logrus.DebugLevel)
-	}
-
-	if logrus.GetLevel() >= logrus.DebugLevel {
-		os.Setenv("ENTER_DEBUG", "true")
 	}
 
 	root, offset, err := findRoot()
@@ -119,15 +81,15 @@ func Mount(dataDir string, args []string, stdout, stderr io.Writer) error {
 		}()
 	}
 
-	logrus.Debugf("Running enter-root %v", os.Args[1:])
+	logrus.Debugf("Running enter-root %v", args[1:])
 	if os.Getpid() == 1 {
-		if err := syscall.Exec(os.Args[0], append([]string{"enter-root"}, args[1:]...), os.Environ()); err != nil {
-			return errors.Wrapf(err, "failed to exec enter-root")
+		if err := syscall.Exec(os.Args[0], append([]string{"(enter-root)"}, args[1:]...), os.Environ()); err != nil {
+			return errors.Wrapf(err, "failed to exec (enter-root)")
 		}
 	}
 	cmd := &exec.Cmd{
 		Path: os.Args[0],
-		Args: append([]string{"enter-root"}, args[1:]...),
+		Args: append([]string{"(enter-root)"}, args[1:]...),
 		SysProcAttr: &syscall.SysProcAttr{
 			Cloneflags:   syscall.CLONE_NEWPID | syscall.CLONE_NEWUTS | syscall.CLONE_NEWIPC,
 			Unshareflags: syscall.CLONE_NEWNS,
@@ -194,7 +156,7 @@ func inFile() (string, uint64, error) {
 	return "", 0, fmt.Errorf("failed to find image in file %s", os.Args[0])
 }
 
-func run(data string) error {
+func enter(data string) error {
 	mounted, err := mount.Mounted(data)
 	if err != nil {
 		return errors.Wrapf(err, "checking %s mounted", data)

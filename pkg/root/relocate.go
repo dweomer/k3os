@@ -1,6 +1,6 @@
-package transferroot
+package root
 
-// copied from linuxkit
+// forked from linuxkit
 
 import (
 	"errors"
@@ -16,8 +16,7 @@ import (
 )
 
 const (
-	relocated = "K3OS_RELOCATED"
-	nextInit  = "/init"
+	nextInit = "/init"
 )
 
 // pivot_root, which runc uses normally will not work on a ramfs or tmpfs root filesystem
@@ -210,9 +209,13 @@ func copyFS(newRoot string) error {
 	return os.Chdir("/")
 }
 
+const ramfsMagic = -2054924042
+const tmpfsMagic = 0x01021994
+
+// Relocate pivotable root
 func Relocate() {
-	if os.Getenv(relocated) == "true" {
-		os.Unsetenv(relocated)
+	if os.Getenv("K3OS_RELOCATED") == "true" {
+		os.Unsetenv("K3OS_RELOCATED")
 		return
 	}
 
@@ -222,11 +225,9 @@ func Relocate() {
 	if err := unix.Statfs(".", &sfs); err != nil {
 		logrus.Fatalf("Cannot statfs cwd: %v", err)
 	}
-	const ramfsMagic = -2054924042
-	const tmpfsMagic = 0x01021994
 	if sfs.Type == ramfsMagic || sfs.Type == tmpfsMagic {
 		const newRoot = "/mnt"
-
+		logrus.Debugf("Relocating to %q", newRoot)
 		if err := os.MkdirAll(newRoot, 0755); err != nil {
 			log.Fatalf("Failed to mkdir %s", newRoot)
 		}
@@ -236,7 +237,9 @@ func Relocate() {
 
 		// exec /sbin/init
 		if err := syscall.Exec(nextInit, []string{nextInit}, append(os.Environ(), "K3OS_RELOCATED=true")); err != nil {
-			log.Fatalf("Cannot exec /sbin/init")
+			log.Fatalf("Cannot exec %s", nextInit)
 		}
+	} else {
+		logrus.Debug("Relocate skipped")
 	}
 }

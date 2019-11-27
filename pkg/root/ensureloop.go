@@ -1,4 +1,4 @@
-package enterchroot
+package root
 
 import (
 	"fmt"
@@ -7,12 +7,11 @@ import (
 	"os/exec"
 
 	"github.com/docker/docker/pkg/mount"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sys/unix"
 )
 
-func mountProc() error {
+func ProcFS() error {
 	if ok, err := mount.Mounted("/proc"); ok && err == nil {
 		return nil
 	}
@@ -24,7 +23,7 @@ func mountProc() error {
 	return mount.ForceMount("proc", "/proc", "proc", "")
 }
 
-func mountDev() error {
+func DevFS() error {
 	if files, err := ioutil.ReadDir("/dev"); err == nil && len(files) > 2 {
 		return nil
 	}
@@ -47,13 +46,6 @@ func mknod(path string, mode uint32, major, minor int) error {
 }
 
 func ensureloop() error {
-	if err := mountProc(); err != nil {
-		return errors.Wrapf(err, "failed to mount proc")
-	}
-	if err := mountDev(); err != nil {
-		return errors.Wrapf(err, "failed to mount dev")
-	}
-
 	// ignore error
 	exec.Command("modprobe", "loop").Run()
 
